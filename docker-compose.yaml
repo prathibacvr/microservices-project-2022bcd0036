@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./web_service
+    image: 2022bcd0036_web_service
+    ports:
+      - "8080:8081"
+    environment:
+      - FLASK_RUN_HOST=0.0.0.0
+    depends_on:
+      - db
+
+  worker:
+    build:
+      context: ./worker_service
+    image: 2022bcd0036_worker_service
+    depends_on:
+      - redis
+    networks:
+      - microservices_network
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
+  redis:
+    image: "redis:alpine"
+    container_name: microservices-project_redis_1
+    networks:
+      - microservices_network
+
+  db:
+    image: "postgres:alpine"
+    container_name: 2022bcd0036_postgres_db
+    environment:
+      POSTGRES_USER: prathibha
+      POSTGRES_PASSWORD: prathibha
+      POSTGRES_DB: microservice_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - microservices_network
+
+volumes:
+  db_data:
+
+networks:
+  microservices_network:
+
